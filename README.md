@@ -18,7 +18,7 @@ example:
 
 and that's it, spring will do the rest
 
-<b>Usage</b>
+<b>Usage</b><br>
 in your controller add request param with type `com.laplasianin.bootstraptable.resolver.Filter` and mark with 
 annotation `@FilterRequest` and resolver will fill it
 
@@ -38,3 +38,8 @@ Supported restrictions: NULL, NOT_NULL,
     LESS_THAN, LESS_THAN_OR_EQUAL_TO,
     LIKE, LIKE_CASE_INSENSITIVE,
     IN, NOT_IN
+
+
+<b>Usage 2</b><br>
+Other way to use is just call util method `RequestParser.parse(Request tableRequest)`.<br>
+In this case you need to populate Request with folowing parameters: offset, limit, sort, order, search, filterData. Check bootstrap table documentation for further explains of this attributes.
