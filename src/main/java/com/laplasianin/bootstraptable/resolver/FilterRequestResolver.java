@@ -1,8 +1,6 @@
 package com.laplasianin.bootstraptable.resolver;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.StringUtils;
+import com.laplasianin.bootstraptable.resolver.request.Request;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebArgumentResolver;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -11,8 +9,8 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.util.Iterator;
+
+import static com.laplasianin.bootstraptable.resolver.utils.RequestParser.parse;
 
 public class FilterRequestResolver implements HandlerMethodArgumentResolver {
 
@@ -42,130 +40,13 @@ public class FilterRequestResolver implements HandlerMethodArgumentResolver {
             String search = httpRequest.getParameter(SEARCH);
             String filterData = httpRequest.getParameter(FILTER);
 
-            SearchFields searchFields = new SearchFields();
-            parseSearches(search, searchFields);
-            parseSearches(filterData, searchFields);
-            SortFields sortFields = parseSorts(sort, order);
+            final Request tableRequest = new Request(offset, limit, sort, order, search, filterData);
 
-            final Filter filter = new Filter();
-            filter.setLimit(limit);
-            filter.setOffset(offset);
-            filter.setSortFields(sortFields);
-            filter.setSearchFields(searchFields);
-            return filter;
+            return parse(tableRequest);
         }
 
         return WebArgumentResolver.UNRESOLVED;
     }
 
-    private SortFields parseSorts(String sort, String order) {
-        SortFields sortFields = new SortFields();
-        if (StringUtils.isNotEmpty(sort) && StringUtils.isNotEmpty(order)) {
-            sortFields.add(sort, SortType.valueOfCaseInsensitive(order));
-        }
-        return sortFields;
-    }
 
-    private void parseSearches(String search, SearchFields searchFields) throws IOException {
-
-        if (StringUtils.isEmpty(search)) {
-            return;
-        }
-
-        JsonNode json;
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            json = mapper.readTree(search);
-        } catch (Exception e) {
-            searchFields.add("_ALL_", SearchType.LIKE, search);
-            return;
-        }
-
-        if (!json.fieldNames().hasNext()) {
-            searchFields.add("_ALL_", SearchType.LIKE, search);
-            return;
-        }
-
-        Iterator<String> fields = json.fieldNames();
-        while (fields.hasNext()) {
-            String field = fields.next();
-
-            JsonNode searchNodes = json.findValue(field);
-            Iterator<String> searchesNames = searchNodes.fieldNames();
-            while (searchesNames.hasNext()) {
-                SearchType searchType = null;
-                Object searchValue = null;
-                String searchTypeString = searchesNames.next();
-                switch (searchTypeString) {
-                    case "lte":
-                        searchType = SearchType.LESS_THAN_OR_EQUAL_TO;
-                        break;
-                    case "gte":
-                        searchType = SearchType.GREATER_THAN_OR_EQUAL_TO;
-                        break;
-                    case "eq":
-                        searchType = SearchType.EQUAL;
-                        break;
-                    case "cnt":
-                        searchType = SearchType.LIKE_CASE_INSENSITIVE;
-                        break;
-                    case "in":
-                        searchType = SearchType.IN;
-                        break;
-                    case "neq":
-                        searchType = SearchType.NOT_EQUAL;
-                        break;
-                    case "nn":
-                        searchType = SearchType.NOT_NULL;
-                        break;
-                    case "null":
-                        searchType = SearchType.NULL;
-                        break;
-                }
-
-                JsonNode value = searchNodes.findValue(searchTypeString);
-                if (!"_values".equals(searchTypeString)) {
-                    try {
-                        searchValue = value.textValue();
-                    } catch (NumberFormatException e) {}
-                } else {
-                    if (value.isArray()) {
-                        for (JsonNode jsonNode : value) {
-                            if (jsonNode.isTextual()) {
-                                String val = jsonNode.textValue();
-                                switch (val) {
-                                    case "ept":
-                                        searchFields.add(field, SearchType.NULL, "ept");
-                                        break;
-                                    case "in":
-                                        searchFields.add(field, SearchType.IN, val);
-                                        break;
-                                    case "nept":
-                                        searchFields.add(field, SearchType.NOT_NULL, "nept");
-                                        break;
-                                    default:
-                                        searchFields.add(field, SearchType.LIKE_CASE_INSENSITIVE, val);
-                                        break;
-                                }
-                            }
-                        }
-                    } else {
-                        String val = value.textValue();
-                        switch (val) {
-                            case "in":
-                                searchFields.add(field, SearchType.IN, val);
-                                break;
-                            default:
-                                searchFields.add(field, SearchType.LIKE_CASE_INSENSITIVE, val);
-                                break;
-                        }
-                    }
-                }
-
-                if (StringUtils.isNotEmpty(field) && searchType != null && searchValue != null) {
-                    searchFields.add(field, searchType, searchValue);
-                }
-            }
-        }
-    }
 }

@@ -1,4 +1,4 @@
-package com.laplasianin.bootstraptable.resolver;
+package com.laplasianin.bootstraptable.resolver.sort;
 
 public enum SortType {
 

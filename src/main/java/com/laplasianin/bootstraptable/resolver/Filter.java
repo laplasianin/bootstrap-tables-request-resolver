@@ -1,5 +1,8 @@
 package com.laplasianin.bootstraptable.resolver;
 
+import com.laplasianin.bootstraptable.resolver.search.SearchFields;
+import com.laplasianin.bootstraptable.resolver.sort.SortFields;
+
 public class Filter {
 
     private int limit = Integer.MAX_VALUE;
