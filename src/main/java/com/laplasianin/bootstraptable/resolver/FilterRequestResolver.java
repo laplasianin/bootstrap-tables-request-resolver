@@ -1,4 +1,4 @@
-package com.laplasianin.resolver;
+package com.laplasianin.bootstraptable.resolver;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

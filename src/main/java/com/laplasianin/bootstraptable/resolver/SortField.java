@@ -1,4 +1,4 @@
-package com.laplasianin.resolver;
+package com.laplasianin.bootstraptable.resolver;
 
 public class SortField {
 
