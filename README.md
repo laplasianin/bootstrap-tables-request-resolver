@@ -28,7 +28,7 @@ example:
 
 Filter contains SearchFields and SortFields
 
-Each sort field has `String field` and `SortType order` (ASC and DESC)
+Each sort field has `String field` and `SortType order` (ASC and DESC)<br>
 Each search field has `String field`, `Object value` and `SearchType restriction`. 
 
 
