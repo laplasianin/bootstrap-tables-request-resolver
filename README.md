@@ -1,5 +1,5 @@
 This resolver allows user transform server-side request from bootstrap table plugin (https://github.com/wenzhixin/bootstrap-table/) to pojo.
-Uses spring and javax-servlet and produce implementation of HandlerMethodArgumentResolver spring class.
+Uses spring and javax-servlet and provide implementation of HandlerMethodArgumentResolver spring class.
 
 <b>Usage</b>
 
